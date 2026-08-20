@@ -425,23 +425,30 @@ Same pattern applies for iOS under `XCUITestOptions`.
 
 ## 9. Sample Resume Section — This Course, Harvard Format
 
-Written as if the framework built in this course were real work delivered — action-verb bullets, reverse-chronological style, ready to drop into a full resume under a "Projects" heading.
-
+Written **as if the full 157-lecture curriculum is completed** — Android + iOS, framework design, CI/CD, and TestNG — as if the framework built in this course were real work delivered. Action-verb bullets, reverse-chronological style, ready to drop into a full resume under a "Projects" heading.
+ 
 ---
 
 ### PROJECTS
 
-**Mobile Test Automation Framework — Appium, Java, TestNG, Maven**
+**Cross-Platform Mobile Test Automation Framework — Appium, Java, TestNG, Maven**
 *Personal Project*
 
-- Installed and configured a complete Appium mobile automation environment (Node.js, Appium server, UiAutomator2 driver, Android SDK, AVD emulator) on Windows from scratch.
-- Created a Maven-based Java test project integrating the Appium Java client and TestNG, including dependency management via `pom.xml`.
-- Built and maintained a Page Object Model test automation framework supporting Android applications, following industry-standard design patterns for framework architecture.
-- Developed test cases covering core mobile interactions: element location (ID, XPath, Accessibility ID), form input, mobile gestures (tap, long-press, scroll, swipe, drag-and-drop), and popup/toast validation.
-- Tested and validated a sample e-commerce Android application end-to-end, including dynamic product selection, cart total validation, and multi-step checkout flows.
-- Debugged and resolved real environment-level automation failures, including Android SDK configuration issues, ADB device-connection states, environment variable propagation across processes, and Appium driver installation — documenting root cause and resolution for each.
-- Configured automated test reporting with Extent Reports, including automatic screenshot capture on test failure.
-- Uploaded and maintained the framework in a version-controlled Git repository, using standard branching and commit practices.
+- Installed and configured a complete Appium mobile automation environment for both Android and iOS (Node.js, Appium server, UiAutomator2 driver, XCUITest driver, Android SDK, AVD emulator, Xcode, iOS Simulator) across Windows and macOS.
+- Designed and built a cross-platform **Page Object Factory** framework with a shared Appium Utils superclass, enabling reusable action methods across both Android and iOS test suites.
+- Developed end-to-end Android test cases covering element location (ID, XPath, Accessibility ID), mobile gestures (tap, long-press, scroll, swipe, drag-and-drop), popup handling, and hybrid app WebView context switching via ChromeDriver.
+- Developed end-to-end iOS test cases using XCUITest capabilities, iOS Class Chain and iOS Predicate String locators, covering gestures, picker components, sliding, and native app automation (e.g. Photos app).
+- Automated a full shopping/e-commerce test flow: form submission, toast message validation, dynamic product selection by scanning scrollable lists, and cart total amount verification, on both platforms.
+- Configured and executed tests on **real physical devices** (Android and iOS), including UDID registration, XcodeOrgId and Bundle ID generation for iOS provisioning.
+- Implemented **data-driven testing** using TestNG DataProvider, sourcing parameterized test data from external JSON files parsed into HashMaps.
+- Built a centralized global properties file for environment/configuration values shared across the framework.
+- Configured **TestNG** at a framework level: prioritized test execution, include/exclude filtering, package-level execution with regex, custom groups, parameterization via `testng.xml`, custom Listeners for reporting hooks, and parallel test execution.
+- Configured automated **Extent Reports** with HTML output and automatic screenshot capture attached to failed test cases via TestNG Listeners.
+- Set up and integrated **Jenkins** for CI/CD, scheduling and parameterizing automated framework runs from a local CI server.
+- Integrated **BrowserStack** cloud infrastructure to execute the framework's test suite in parallel across multiple real devices in the cloud.
+- Triggered and parameterized framework test runs via Maven command-line options, passing runtime parameters directly into test execution.
+- Debugged and resolved real environment-level automation failures — Android SDK/environment variable configuration, ADB device-connection state issues, Appium driver installation gaps, and cross-OS (Windows/Mac) environment variable setup — documenting root cause and resolution for each.
+- Version-controlled the full framework using Git, including branching strategy and resolving merge conflicts, with all code pushed to a remote GitHub repository.
 
 ---
 
@@ -449,21 +456,29 @@ Written as if the framework built in this course were real work delivered — ac
 
 - **Languages:** Java
 
-- **Mobile Automation:** Appium, Appium Server, UiAutomator2 Driver, TestNG, Maven, Android Studio, Android SDK, AVD Emulator, ADB (Android Debug Bridge)
+- **Mobile Automation — Android:** Appium, Appium Server, UiAutomator2 Driver, Android Studio, Android SDK, AVD Emulator, ADB (Android Debug Bridge), ChromeDriver (hybrid/WebView context switching)
 
-- **Framework Design:** Page Object Model, data-driven testing (TestNG DataProvider, JSON parameterization)
+- **Mobile Automation — iOS:** XCUITest Driver, Xcode, iOS Simulator, iOS Class Chain locator, iOS Predicate String locator, real device provisioning (UDID, XcodeOrgId, Bundle ID)
 
-- **Reporting:** Extent Reports
+- **Framework Design:** Page Object Factory pattern, reusable Appium Utils superclass (Android/iOS shared architecture), data-driven testing (TestNG DataProvider, JSON parameterization), global properties/config management
 
-- **Version Control:** Git, GitHub
+- **Test Framework (TestNG):** Annotations, test prioritization, include/exclude filtering, regex package-level execution, groups, `testng.xml` parameterization, Listeners, parallel execution
 
-- **Environment & Tooling:** Node.js, npm, JDK, Windows environment variable / PATH configuration, command-line (PowerShell) troubleshooting
+- **Build & Dependency Management:** Maven (build lifecycle, command-line test triggering, runtime parameterization)
 
-- **IDE:** IntelliJ IDEA
+- **CI/CD & Cloud:** Jenkins (local CI/CD setup, job scheduling and parameterization), BrowserStack (cloud device execution, parallel test runs)
 
-- **Runtime/Platform:** Android (Emulator & Real Device)
+- **Reporting:** Extent Reports (HTML reports, automatic failure screenshots via TestNG Listeners)
+
+- **Version Control:** Git (branching, merge conflict resolution, staging/commit workflow), GitHub (remote repository management)
+
+- **Environment & Tooling:** Node.js, npm, JDK, Windows & macOS environment variable / PATH configuration, command-line (PowerShell/Terminal) troubleshooting
+
+- **IDE:** IntelliJ IDEA (also compatible with Eclipse-based TestNG setup)
+
+- **Platform Coverage:** Android (Emulator & Real Device), iOS (Simulator & Real Device)
 
 ---
 
-*Note: this section reflects work actually completed while progressing through the course — update bullet specifics (e.g. app tested, framework depth) as more sections are finished, and be ready to speak to the architecture/code directly if asked in an interview.*
- 
+*Note: this section assumes full course completion. Update specifics (app tested, exact bug counts, framework depth) to match what was genuinely built, and be ready to speak to the architecture/code directly if asked in an interview — especially the Page Object Factory design and the Jenkins/BrowserStack integration, since those are the strongest signals of framework-level (not just script-level) skill.*
+  
