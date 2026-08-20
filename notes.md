@@ -447,13 +447,23 @@ Written as if the framework built in this course were real work delivered — ac
 
 ### TECHNICAL SKILLS *(relevant to this project)*
 
-**Languages:** Java
-**Mobile Automation:** Appium, TestNG, Maven, Android Studio, Android SDK / AVD Emulator
-**Framework Design:** Page Object Model, data-driven testing (DataProvider, JSON parameterization)
-**Reporting:** Extent Reports
-**Version Control:** Git, GitHub
-**Tools:** IntelliJ IDEA, ADB (Android Debug Bridge)
+- **Languages:** Java
+
+- **Mobile Automation:** Appium, Appium Server, UiAutomator2 Driver, TestNG, Maven, Android Studio, Android SDK, AVD Emulator, ADB (Android Debug Bridge)
+
+- **Framework Design:** Page Object Model, data-driven testing (TestNG DataProvider, JSON parameterization)
+
+- **Reporting:** Extent Reports
+
+- **Version Control:** Git, GitHub
+
+- **Environment & Tooling:** Node.js, npm, JDK, Windows environment variable / PATH configuration, command-line (PowerShell) troubleshooting
+
+- **IDE:** IntelliJ IDEA
+
+- **Runtime/Platform:** Android (Emulator & Real Device)
 
 ---
 
 *Note: this section reflects work actually completed while progressing through the course — update bullet specifics (e.g. app tested, framework depth) as more sections are finished, and be ready to speak to the architecture/code directly if asked in an interview.*
+ 
