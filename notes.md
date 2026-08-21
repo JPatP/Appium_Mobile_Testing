@@ -108,19 +108,19 @@ Most errors happen somewhere in this chain, not in your test code itself — whe
    ```
 5. **Install Android Studio** — this bundles the Android SDK and AVD Manager. Note the SDK path shown in **Settings → Languages & Frameworks → Android SDK** — you'll need it for env vars.
 6. **Create a virtual device (AVD)** via Android Studio's Device Manager (e.g. Pixel 7).
-7. **Set environment variables** (see Section 6 below — this is the step most likely to break on a fresh PC).
+7. **Set environment variables** (see Section 7 below — this is the step most likely to break on a fresh PC).
 
 8. **Install Maven standalone.**
    IntelliJ bundles its own internal copy of Maven, but that copy is **not** on the system `Path` — a plain terminal (PowerShell, cmd) has no idea `mvn` exists unless it's installed separately at the OS level.
 
-   - Download from the official site: **https://maven.apache.org/download.cgi** — grab the **Binary zip archive** (`apache-maven-x.x.x-bin.zip`).
-   - Extract it somewhere permanent, e.g. `C:\tools\apache-maven-3.9.16`.
-   - Add `C:\tools\apache-maven-3.9.16\bin` to your **system `Path`** environment variable (this is what makes `mvn` work in *any* terminal, not just IntelliJ's).
-   - Open a **new** terminal window and confirm:
-     ```bash
-     mvn -version
-     ```
-   - This should print the Maven version, the Maven home path, and the JDK it's using — confirming it's installed globally, not per-project.
+    - Download from the official site: **https://maven.apache.org/download.cgi** — grab the **Binary zip archive** (`apache-maven-x.x.x-bin.zip`).
+    - Extract it somewhere permanent, e.g. `C:\tools\apache-maven-3.9.16`.
+    - Add `C:\tools\apache-maven-3.9.16\bin` to your **system `Path`** environment variable (this is what makes `mvn` work in *any* terminal, not just IntelliJ's).
+    - Open a **new** terminal window and confirm:
+      ```bash
+      mvn -version
+      ```
+    - This should print the Maven version, the Maven home path, and the JDK it's using — confirming it's installed globally, not per-project.
 
    **Add dependencies to `pom.xml`** — this is how Maven knows to download and use a library like Appium's Java client. Example (from Maven Central, the official public repository):
    ```xml
@@ -136,14 +136,14 @@ Most errors happen somewhere in this chain, not in your test code itself — whe
 9. **Install IntelliJ IDEA**, open/create the Maven project, add `java-client` (Appium) and `testng` dependencies to `pom.xml` (see step 8 above for the exact block).
 
    **IntelliJ setup checklist — things easy to miss on a fresh install:**
-   - **File → Settings → Plugins** — confirm **Maven** and **TestNG** plugins are enabled (usually bundled by default, but worth checking after a clean install).
-   - **Install the Claude Code plugin** (GUI) via Settings → Plugins → Marketplace → search "Claude Code" — lets you use Claude directly inside IntelliJ for coding help, not just chat in a browser.
-   - **JetBrains MCP server** — if using AI tooling that connects via MCP (Model Context Protocol), this can be enabled under Settings → Tools (or via the AI Assistant/Claude Code plugin settings, depending on IDE version) so external AI tools can interact with the IDE directly.
-   - **Build tool support** — confirm both **Maven** and **Gradle** integration plugins are present under Settings → Plugins → Build Tools, even if this project only uses Maven — some Appium/Java course material or sample projects may use Gradle instead.
-   - **JDK setup** — File → Project Structure → SDKs, confirm the correct JDK is registered and selected for the project.
+    - **File → Settings → Plugins** — confirm **Maven** and **TestNG** plugins are enabled (usually bundled by default, but worth checking after a clean install).
+    - **Install the Claude Code plugin** (GUI) via Settings → Plugins → Marketplace → search "Claude Code" — lets you use Claude directly inside IntelliJ for coding help, not just chat in a browser.
+    - **JetBrains MCP server** — if using AI tooling that connects via MCP (Model Context Protocol), this can be enabled under Settings → Tools (or via the AI Assistant/Claude Code plugin settings, depending on IDE version) so external AI tools can interact with the IDE directly.
+    - **Build tool support** — confirm both **Maven** and **Gradle** integration plugins are present under Settings → Plugins → Build Tools, even if this project only uses Maven — some Appium/Java course material or sample projects may use Gradle instead.
+    - **JDK setup** — File → Project Structure → SDKs, confirm the correct JDK is registered and selected for the project.
 
 10. **Start the emulator.**
-    Two ways to do this — prefer the terminal method (see Section 5 below for why):
+    Two ways to do this — prefer the terminal method (see Section 6 below for why):
 
     - **Terminal (preferred):**
       ```bash
@@ -152,7 +152,7 @@ Most errors happen somewhere in this chain, not in your test code itself — whe
       emulator -avd "Pixel_7_API_37" -verbose
       ```
       Replace `"Pixel_7_API_37"` with whatever name `-list-avds` actually prints. `-verbose` streams real boot logs to the terminal — you see exactly what's happening, including errors, in real time.
-    - **Android Studio GUI (fallback):** Device Manager → click the ▶ Play icon next to your AVD. Works, but the status indicator ("Starting up") can hang/lie — see Section 5.
+    - **Android Studio GUI (fallback):** Device Manager → click the ▶ Play icon next to your AVD. Works, but the status indicator ("Starting up") can hang/lie — see Section 6.
 
 11. **Verify the whole chain works:**
     - Start the Appium server (`appium` in a terminal)
@@ -162,7 +162,82 @@ Most errors happen somewhere in this chain, not in your test code itself — whe
 
 ---
 
-## 4. Commands Used
+## 4. Reusable Test Setup Pattern (Programmatic Server Start)
+
+Once this pattern works, it's the same skeleton for basically every future test — this is the "do it once, reuse forever" boilerplate.
+
+```java
+package com.pat.appium;
+
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.options.UiAutomator2Options;
+import io.appium.java_client.service.local.AppiumDriverLocalService;
+import io.appium.java_client.service.local.AppiumServiceBuilder;
+import org.testng.annotations.Test;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+public class AppiumBasicsTest {
+    @Test
+    public void Test() throws MalformedURLException, URISyntaxException {
+
+        // Setup
+        AppiumDriverLocalService service = new AppiumServiceBuilder()
+                .withAppiumJS(new File("C:\\Users\\gonza\\AppData\\Roaming\\npm\\node_modules\\appium\\build\\lib\\main.js"))
+                .withIPAddress("127.0.0.1")
+                .usingPort(4723)
+                .build();
+        service.start();
+
+        UiAutomator2Options options = new UiAutomator2Options();
+        options.setDeviceName("Pixel_7");
+        options.setApp("C:\\Users\\gonza\\IdeaProjects\\AppiumMobileTests\\src\\main\\java\\resources\\ApiDemos-debug.apk");
+
+        // Android Driver
+        AndroidDriver driver = new AndroidDriver(new URI("http://127.0.0.1:4723").toURL(), options);
+
+        // Actual Automation
+        // ... test steps go here ...
+
+        driver.quit();
+        service.stop();
+    }
+}
+```
+
+### Why each piece exists (per the java-client docs)
+
+**`AppiumDriverLocalService` + `AppiumServiceBuilder`**
+These two classes let you **start and stop the Appium server from inside your Java code**, instead of manually opening a separate terminal and typing `appium` every time before running a test. `AppiumServiceBuilder` is a builder — every method call (`.withAppiumJS(...)`, `.withIPAddress(...)`, `.usingPort(...)`) configures one setting and returns the same builder object (`self-reference`, per the javadoc), which is why they can be chained fluently into one statement. `.build()` at the end produces the actual `AppiumDriverLocalService` object; `.start()` is what physically launches the Node.js process running Appium.
+**Why this matters for real work:** this is exactly the pattern used for **CI/CD pipelines** (Jenkins, etc.) — a fully automated pipeline can't have a human sitting there manually typing `appium` in a terminal before every run. Programmatic start/stop means the whole test suite is self-contained and can run unattended.
+
+**`.withAppiumJS(File)`**
+Tells the builder exactly which `main.js` file to execute as the server entry point (per docs: *"an executable appium.js (1.4.x and lower) or main.js (1.5.x and higher)"*). This is the same `main.js` path noted in Section 7 — normally Appium finds this automatically when you just type `appium` in a terminal, but when starting it programmatically, you have to point directly at the file.
+
+**`.withIPAddress(String)`**
+Sets the address the server should bind to. **Expects a bare host/IP only** — `"127.0.0.1"`, not `"http://127.0.0.1"`. This is exactly the bug documented in Section 6 above (`UnknownHostException: http`) — passing a full URL here breaks both Appium's own CLI argument validation and the Java client's server-availability ping.
+
+**`.usingPort(int)`**
+Sets which port the server listens on (`4723` is Appium's conventional default, though any free port works). Must match the port used later when constructing the driver's connection URL — if these two don't agree, the driver will try to connect to a server that isn't listening on that port.
+
+**`service.start()` / `service.stop()`**
+Actually launches / shuts down the Node.js Appium process. `service.stop()` should always be called when the test finishes (ideally in a `finally` block or `@AfterMethod`) — otherwise the Appium server process keeps running in the background even after your test ends, which can cause port conflicts on the next run.
+
+**`UiAutomator2Options`**
+A capabilities builder specific to Android automation via the UiAutomator2 driver. Instead of manually building a raw key-value capabilities map (the old, error-prone way), this class provides typed setter methods — `setDeviceName()`, `setApp()`, `setUdid()`, etc. — for every capability the UiAutomator2 driver understands, with autocomplete and compile-time checking instead of typo-prone string keys. Full method list: `https://www.javadoc.io/doc/io.appium/java-client/latest/io/appium/java_client/android/options/UiAutomator2Options.html`
+
+**`new AndroidDriver(URL, options)`**
+This is the actual moment the test connects to the running Appium server and requests a new automation session. It sends an HTTP `POST /session` request to the server's URL, with `options` serialized as the desired capabilities — the server then hands that request off to the UiAutomator2 driver, which uses `adb` to install/launch the app on the target device (see the architecture diagram in Section 1). This is why the URL and port here (`http://127.0.0.1:4723`) must exactly match what was configured on the `AppiumServiceBuilder` above — same server, two different places it's referenced.
+
+**Why `new URI(...).toURL()` instead of `new URL(...)` directly**
+Constructing a `URL` object directly from a string is considered legacy/unsafe in modern Java, since it performs zero validation of the string's structure at construction time — malformed URLs can silently produce broken `URL` objects. Building a `URI` first validates the string against proper URI syntax rules, and only then converting it to a `URL` (`.toURL()`) catches syntax errors early and explicitly, via a checked `URISyntaxException` — which is exactly why the method signature above declares `throws URISyntaxException`.
+
+---
+
+## 5. Commands Used
 
 ### ADB / Emulator
 
@@ -200,7 +275,7 @@ Shows the list of available AVDs (Android Virtual Devices) by name.
 ```bash
 emulator -avd "emulator name" -verbose
 ```
-Launches a specific AVD by name with live logs streamed to the terminal. **This is the method that actually worked reliably** — see Section 5, "adb devices shows offline," for the real-world case where this solved a stuck/lying GUI status.
+Launches a specific AVD by name with live logs streamed to the terminal. **This is the method that actually worked reliably** — see Section 6, "adb devices shows offline," for the real-world case where this solved a stuck/lying GUI status.
 
 ### Appium
 
@@ -245,7 +320,7 @@ Same as above, but forces Maven to re-check for updated dependency versions inst
 
 ---
 
-## 5. Debugging Problems & Solutions
+## 6. Debugging Problems & Solutions
 
 Real errors hit during setup, kept in the order encountered — cause, fix, and the underlying lesson for each.
 
@@ -283,19 +358,34 @@ Real errors hit during setup, kept in the order encountered — cause, fix, and 
 - **Cause:** Emulator's graphics/UI can fully boot (visible home screen) while `adbd` (the internal daemon that talks back to your PC) hasn't completed its handshake — often worsened by **duplicate adb servers** (Android Studio's bundled one + a manually started one) fighting over the same port.
 - **What actually fixed it:** Closing the emulator entirely and launching it **directly from the terminal** with `emulator -avd "name" -verbose` instead of starting it through Android Studio's Device Manager GUI. The GUI-launched emulator was the one getting stuck in `offline` and taking a very long time with no useful feedback. Calling it directly from cmd bypassed whatever was wedging the GUI path and connected cleanly and fast.
 - **Other things tried before landing on the real fix (kept for reference, in escalation order):**
-  1. `adb kill-server` + `adb start-server`
-  2. `adb reconnect offline`
-  3. `tasklist | findstr adb` → kill duplicates with `taskkill /F /IM adb.exe` → `adb start-server`
-  4. Cold Boot the emulator (Device Manager → ⋮ → **Cold Boot Now**)
+    1. `adb kill-server` + `adb start-server`
+    2. `adb reconnect offline`
+    3. `tasklist | findstr adb` → kill duplicates with `taskkill /F /IM adb.exe` → `adb start-server`
+    4. Cold Boot the emulator (Device Manager → ⋮ → **Cold Boot Now**)
 - **Lesson:** "Offline" ≠ "no device found" — different failure mode, different fix. And more broadly: **when the GUI path is unreliable, launch the same tool directly from the terminal** — same emulator binary, but without Android Studio's extra polling/status layer in the way.
 
 ### `Could not find a driver for automationName 'UIAutomator2' and platformName 'ANDROID'`
 - **Cause:** The UiAutomator2 driver plugin itself was never installed into the Appium server. Appium 2.x separated the server from its drivers — installing Appium doesn't install any driver by default.
 - **Fix:** `appium driver install uiautomator2`, confirmed with `appium driver list --installed`.
 
+### `AppiumServerHasNotBeenStartedLocallyException` + `UnknownHostException: http` (starting Appium server programmatically via `AppiumServiceBuilder`)
+- **Symptom:** Server fails to start with a CLI argument validation error (`main.js server: error: argument --address/-a: FORMAT must match format "hostname"`), then times out with `Appium HTTP server is not listening at http://http://127.0.0.1:4723/` — note the doubled `http://`.
+- **Cause:** `.withIPAddress("http://127.0.0.1")` was passed a full URL (with scheme) instead of a bare hostname/IP. `withIPAddress()` expects just `127.0.0.1`, not `http://127.0.0.1`. Appium's own CLI arg validator rejects the malformed hostname, and separately, the Java client's availability-checker prepends its own `http://` on top when pinging the server, producing the doubled-scheme URL and the resulting `UnknownHostException: http`.
+- **Fix:** Drop the scheme in `withIPAddress()` — pass only `"127.0.0.1"`:
+  ```java
+  AppiumDriverLocalService service = new AppiumServiceBuilder()
+          .withAppiumJS(new File("C:\\Users\\gonza\\AppData\\Roaming\\npm\\node_modules\\appium\\build\\lib\\main.js"))
+          .withIPAddress("127.0.0.1")   // no "http://" here
+          .usingPort(4723)
+          .build();
+  service.start();
+  ```
+  The scheme is still correct (and needed) in the separate `new URI("http://127.0.0.1:4723")` call used for the actual driver connection — it's specifically `withIPAddress()` on `AppiumServiceBuilder` that wants a bare host, not a URL.
+- **Lesson:** Different Appium/Selenium APIs have different expected input formats for "the same thing" (address vs. URL) — always check whether a method wants a bare host/IP or a full URL with scheme; mixing them up produces confusing double-prefixed errors downstream rather than a clear "wrong format" message at the call site.
+
 ---
 
-## 6. Technical Notes for Reference
+## 7. Technical Notes for Reference
 
 ### Environment Variables — what each one does, who reads it
 
@@ -310,6 +400,13 @@ Real errors hit during setup, kept in the order encountered — cause, fix, and 
 - A process already running **before** a variable is set/changed will **not** see the new value.
 - Only a **freshly opened** process (new terminal, restarted IDE, restarted Appium server) picks up the new value.
 - Only restart the specific process that actually *reads* the changed variable — trace the parent/child chain (e.g. is Appium running standalone, or spawned from inside IntelliJ's terminal?) rather than restarting everything defensively.
+
+### Where Appium itself actually lives (npm global install)
+Main Appium server entry file:
+```
+C:\Users\gonza\AppData\Roaming\npm\node_modules\appium\build\lib\main.js
+```
+This is the actual file Node.js runs when you type `appium` in a terminal — useful to know if you ever need to check the installed version's source, debug a weird global-install issue, or point another tool directly at it.
 
 ### Appium 2.x vs 1.x
 Appium 2.x separated the **server** from its **drivers**. Installing/starting the Appium server does not give you Android or iOS automation — you must separately install `uiautomator2` (Android) and/or `xcuitest` (iOS) drivers.
@@ -330,11 +427,11 @@ Same pattern applies for iOS under `XCUITestOptions`.
 
 ---
 
-## 7. Notes / Progress Log
+## 8. Notes / Progress Log
 
 *Add dated entries here as sections are completed.*
 
-**Aug 20, 2026** — Finished full environment setup: JDK, Maven, IntelliJ, Node/Appium server, Android Studio + AVD, UiAutomator2 driver. Hit and resolved 9 separate setup errors (see Section 5 above) — env vars, PATH, adb offline states, GUI emulator hang, missing driver. First test (`AppiumBasicsTest`) launches the app successfully on the emulator. Next: locators (ID, XPath, Accessibility ID) and basic element interaction.
+**Aug 20, 2026** — Finished full environment setup: JDK, Maven, IntelliJ, Node/Appium server, Android Studio + AVD, UiAutomator2 driver. Hit and resolved 10 separate setup errors (see Section 6 above) — env vars, PATH, adb offline states, GUI emulator hang, missing driver, and a programmatic-server-start address format bug. First test (`AppiumBasicsTest`) launches the app successfully on the emulator, including full server start/stop lifecycle managed from code. Next: locators (ID, XPath, Accessibility ID) and basic element interaction.
 
 ### Still To Learn / Revisit
 - [ ] iOS setup (Xcode, XCUITest driver, iOS Simulator)
@@ -345,7 +442,7 @@ Same pattern applies for iOS under `XCUITestOptions`.
 
 ---
 
-## 8. Course Curriculum Reference (Full Outline)
+## 9. Course Curriculum Reference (Full Outline)
 
 ### Core Fundamentals
 - Appium features & internal architecture
@@ -423,10 +520,10 @@ Same pattern applies for iOS under `XCUITestOptions`.
 
 ---
 
-## 9. Sample Resume Section — This Course, Harvard Format
+## 10. Sample Resume Section — This Course, Harvard Format
 
 Written **as if the full 157-lecture curriculum is completed** — Android + iOS, framework design, CI/CD, and TestNG — as if the framework built in this course were real work delivered. Action-verb bullets, reverse-chronological style, ready to drop into a full resume under a "Projects" heading.
- 
+
 ---
 
 ### PROJECTS
@@ -481,4 +578,3 @@ Written **as if the full 157-lecture curriculum is completed** — Android + iOS
 ---
 
 *Note: this section assumes full course completion. Update specifics (app tested, exact bug counts, framework depth) to match what was genuinely built, and be ready to speak to the architecture/code directly if asked in an interview — especially the Page Object Factory design and the Jenkins/BrowserStack integration, since those are the strongest signals of framework-level (not just script-level) skill.*
-  
